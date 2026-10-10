@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { toTurns, type Turn } from "./transcript";
+import { toTurns, type Turn } from "./transcript.ts";
 
 /**
  * Vaani AI (app.vaanivoice.ai) webhooks are unsigned, so the webhook URL carries a secret:
@@ -71,9 +71,11 @@ export function readVaani(payload: any): VaaniEvent {
   const event = String(both("event", "type", "event_type") ?? "unknown");
 
   const entities = { ...(both("entities") ?? {}), ...(both("collected_data", "collectedData") ?? {}) };
+  // Real call_postprocessing payloads send seconds (224.02 for a ~4 min call), though older
+  // docs said milliseconds. A value above 10,000 can only be milliseconds (that's ~3 hours in seconds).
   const rawDur = Number(both("call_duration", "duration", "call_details.call_duration"));
   const durationSec = Number.isFinite(rawDur) && rawDur > 0
-    ? Math.round(event === "call_postprocessing" || rawDur > 36_000 ? rawDur / 1000 : rawDur)
+    ? Math.round(rawDur > 10_000 ? rawDur / 1000 : rawDur) || null
     : null;
 
   const slot = ["booked_slot", "appointment_time", "consultation_slot", "slot"]
@@ -88,8 +90,8 @@ export function readVaani(payload: any): VaaniEvent {
       ((entities.phone ?? entities.phone_number) as string | undefined) ??
       null,
     at: date(both("timestamp", "created_at", "createdAt")),
-    startedAt: date(both("started_at", "startedAt", "start_time", "call_details.started_at")),
-    endedAt: date(both("ended_at", "endedAt", "end_time", "call_details.ended_at")),
+    startedAt: date(both("call_started_at", "started_at", "startedAt", "start_time", "call_details.started_at")),
+    endedAt: date(both("call_ended_at", "ended_at", "endedAt", "end_time", "call_details.ended_at")),
     durationSec,
     summary: (both("summary", "call_summary") as string | undefined) ?? null,
     entities,

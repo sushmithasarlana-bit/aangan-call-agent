@@ -59,7 +59,7 @@ Pick exactly one classification:
 - unclear: the call dropped, or there is too little information to judge criteria 1–3.
 
 Judgement notes:
-- Service area: the locality list in services.md is not exhaustive. Any locality inside Pune city or PCMC counts (for example Kharadi, Bavdhan, Nanded City). Only places outside Pune and PCMC fail (Talegaon, Lonavala, Nashik, Mumbai, other cities).
+- Service area: the locality list in services.md is not exhaustive. Any locality inside Pune city or PCMC counts (for example Kharadi, Bavdhan, Nanded City). Only places outside Pune and PCMC fail (Talegaon, Lonavala, Nashik, Mumbai, other cities). If the location is vague (for example just "Phase 1", with no area named), don't guess: add it to uncertainties and say in watch-outs that the designer must confirm the locality.
 - Timeline: compare the caller's required finish date with the call date given below. Fail only if they need it finished in under 6 weeks. Far-off dates are fine. If the caller only muses about a later start without committing to it, judge the request they actually made.
 - Decision-maker: someone calling for parents or a spouse is represented if those people will attend the consultation or have authorised the caller. Qualify, and note it.
 - Budget: never infer a budget from the property type or locality. Only judge a figure the caller volunteered.

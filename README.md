@@ -117,7 +117,7 @@ vaani/agent-setup.md     Voice agent prompt, greeting, webhook settings
 
 - **Unsigned webhooks:** Vaani AI doesn't sign its webhooks, so the secret is in the URL and compared in constant time.
 - **Idempotent:** `call_started` only fills blanks. `call_postprocessing` takes a one-time `processed_at` latch, so a retry never overwrites the call or sends a second email.
-- **Duration:** `call_duration` is in milliseconds and sometimes missing. When it is, duration comes from `call_started` → end.
+- **Duration:** real Vaani payloads send `call_duration` in seconds (the class guide said milliseconds; anything above 10,000 is treated as milliseconds). When it is missing, duration comes from `call_started_at` → `call_ended_at`.
 - **Never lose a lead:** if Gemini fails, the raw transcript goes to the front desk. Each output (email, HubSpot) is best-effort and logged in `output_errors`.
 - **Link scanners:** email clients pre-open links, so Claim / Reschedule are HMAC-signed. GET only shows a confirm page; POST records the action. A claim is atomic: first to claim wins.
 - **Free-tier limits:** Gemini's free tier allows about 20 requests a day, so the eval spaces its requests out. Resend's sandbox only delivers to your own address. Inbound phone numbers on Vaani are paid, so demos use Vaani's test call.
