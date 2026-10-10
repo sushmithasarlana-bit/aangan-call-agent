@@ -1,0 +1,12 @@
+[
+  { "id": "T01", "call_time": "2026-09-02T10:23:00+05:30", "expect": "qualified", "why": "3BHK Kothrud, owner, done by March" },
+  { "id": "T02", "call_time": "2026-09-03T14:41:00+05:30", "expect": "qualified", "asked_pricing": true, "why": "2BHK Wakad, asks the price twice" },
+  { "id": "T03", "call_time": "2026-09-03T16:15:00+05:30", "expect": "not_fit", "criterion": "service_area", "why": "Nashik" },
+  { "id": "T04", "call_time": "2026-09-04T11:07:00+05:30", "expect": "not_fit", "criterion": "real_project", "why": "Ideas and advice only" },
+  { "id": "T07", "call_time": "2026-09-08T09:44:00+05:30", "expect": "not_fit", "criterion": "timeline", "why": "Before Diwali, 3 weeks away" },
+  { "id": "T09", "call_time": "2026-09-10T11:32:00+05:30", "expect": "complaint", "why": "Existing client, angry" },
+  { "id": "T10", "call_time": "2026-09-11T14:04:00+05:30", "expect": "not_fit", "criterion": "budget", "why": "1BHK Kharadi, ₹1–1.5 lakh volunteered" },
+  { "id": "T11", "call_time": "2026-09-12T10:18:00+05:30", "expect": "qualified", "why": "Rented 2BHK Baner, no structural work" },
+  { "id": "T14", "call_time": "2026-09-17T11:41:00+05:30", "expect": "qualified", "why": "Son calling for parents, Hadapsar (decision-maker note)" },
+  { "id": "T19", "call_time": "2026-09-24T16:02:00+05:30", "expect": "not_fit", "criterion": "out_of_scope", "why": "Restaurant" }
+]

@@ -1,0 +1,16 @@
+node_modules
+.next
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+
+# Secrets
+.vercel
+.env*
+!.env.example
+
+# The Cut: the internal pricing guide never enters the repo or any prompt.
+knowledge/pricing.md
+
+# Superseded planning notes from an earlier, production-scale plan (kept locally only)
+docs/archive/
