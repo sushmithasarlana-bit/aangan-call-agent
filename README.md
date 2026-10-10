@@ -4,7 +4,7 @@ An AI front desk for **Aangan Studio**, an interior design studio in Pune (MESA 
 
 **It never quotes a price.** That's the Cut.
 
-- **Live dashboard:** see the Vercel link in the repo sidebar (username `aangan`; the password is shared separately)
+- **Live app:** https://aangan-call-agent-pi.vercel.app (dashboard username `aangan`; the password is shared separately)
 - **Component map:** [`docs/component-map.html`](docs/component-map.html)
 - **Eval:** [`evals/results.md`](evals/results.md), the 10 September enquiries scored against the expected answers
 

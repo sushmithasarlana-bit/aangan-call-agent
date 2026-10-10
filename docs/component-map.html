@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aangan Call Agent Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a swimlane grid (actor rows × Trigger→Output columns), the class's component-map format, with the Cut called out above it. */
+:root {
+  --bg: #f5f6f4;
+  --paper: #ffffff;
+  --ink: #1c1f1d;
+  --ink-2: #545a56;
+  --line: #dde1dc;
+  --head: #232a27;
+  --head-ink: #f2f4f1;
+  --accent: #1f6f5c;
+  --ai: #ece7fb;      --ai-edge: #8b78d8;
+  --sys: #e7f0fa;     --sys-edge: #6f9fd3;
+  --out: #e4f4e8;     --out-edge: #5fae73;
+  --human: #fdf1dc;   --human-edge: #d9a441;
+  --esc: #fbe5e3;     --esc-edge: #d46a5f;
+  --cut: #fff4f2;     --cut-edge: #c2453a;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #131615; --paper: #1b1f1d; --ink: #e9ece8; --ink-2: #a9b0ab; --line: #2f3532;
+    --head: #0d100f; --head-ink: #e9ece8; --accent: #6cc5ad;
+    --ai: #2a2440; --ai-edge: #9d8ce6; --sys: #1d2a38; --sys-edge: #7aa8dc;
+    --out: #1c3124; --out-edge: #6fbd83; --human: #3a2f19; --human-edge: #e0b158;
+    --esc: #3b2220; --esc-edge: #e07d72; --cut: #2e1c1a; --cut-edge: #e2685c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #131615; --paper: #1b1f1d; --ink: #e9ece8; --ink-2: #a9b0ab; --line: #2f3532;
+  --head: #0d100f; --head-ink: #e9ece8; --accent: #6cc5ad;
+  --ai: #2a2440; --ai-edge: #9d8ce6; --sys: #1d2a38; --sys-edge: #7aa8dc;
+  --out: #1c3124; --out-edge: #6fbd83; --human: #3a2f19; --human-edge: #e0b158;
+  --esc: #3b2220; --esc-edge: #e07d72; --cut: #2e1c1a; --cut-edge: #e2685c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: end; }
+.kicker { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 2px 0 0; font-size: clamp(22px, 3vw, 30px); line-height: 1.15; text-wrap: balance; }
+.lede { margin: 6px 0 0; color: var(--ink-2); max-width: 68ch; }
+code, .mono { font-family: var(--font-mono); font-size: .86em; }
+
+.cut { background: var(--cut); border: 1px solid var(--cut-edge); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.cut h2 { margin: 0; font-size: 15px; }
+.cut p { margin: 0; color: var(--ink-2); max-width: 90ch; }
+.cut s { color: var(--cut-edge); }
+
+.grid-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); }
+table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1180px; font-size: 13px; }
+thead th { background: var(--head); color: var(--head-ink); font-weight: 600; padding: 10px 10px; text-align: center; position: sticky; top: 0; }
+thead th:first-child { text-align: left; }
+tbody th { text-align: left; vertical-align: top; padding: 12px 10px; width: 190px; border-bottom: 1px solid var(--line); font-weight: 600; }
+tbody th span { display: block; font-weight: 400; color: var(--ink-2); font-size: 12px; }
+td { vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); width: 15%; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+.c { border-radius: 7px; padding: 7px 9px; border: 1px solid; line-height: 1.4; }
+.c b { display: block; font-weight: 600; }
+.ai { background: var(--ai); border-color: var(--ai-edge); }
+.sys { background: var(--sys); border-color: var(--sys-edge); }
+.out { background: var(--out); border-color: var(--out-edge); }
+.human { background: var(--human); border-color: var(--human-edge); }
+.esc { background: var(--esc); border-color: var(--esc-edge); }
+.flow { color: var(--ink-2); font-size: 12px; margin-top: 4px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 18px; height: 12px; border-radius: 3px; border: 1px solid; display: inline-block; }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.note { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.note h3 { margin: 0 0 4px; font-size: 14px; }
+.note p { margin: 0; color: var(--ink-2); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="kicker">Aangan Studio · MESA Case 03</p>
+      <h1>Phone enquiry component map</h1>
+      <p class="lede">Every call is answered, qualified against Nikhil's rubric and handed to a designer with full context. Rows are the people and systems involved; columns follow one call from trigger to output.</p>
+    </div>
+  </header>
+
+  <section class="cut" aria-labelledby="cut-h">
+    <h2 id="cut-h">The Cut: the agent never quotes a price</h2>
+    <p>The first draft had the voice agent "provide indicative pricing" from <s class="mono">pricing.md</s>. That is removed. A price said in the studio's voice is heard as a commitment and cannot be taken back. <code>pricing.md</code> is never loaded into any prompt, never committed and never bundled. A code-level guard strips any price line from AI output, and a caller who asks about price is still qualified normally.</p>
+  </section>
+
+  <div class="grid-wrap" role="region" aria-label="Component map" tabindex="0">
+    <table>
+      <thead>
+        <tr><th scope="col">Actor / platform</th><th scope="col">Trigger</th><th scope="col">Input</th><th scope="col">Context</th><th scope="col">Processing</th><th scope="col">AI</th><th scope="col">Output</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Customer / caller<span>Prospective client</span></th>
+          <td><div class="c sys"><b>Calls Aangan Studio</b>Any hour, including after 7pm</div></td>
+          <td><div class="c sys">Shares project, location, timeline; may ask the price</div></td>
+          <td></td><td></td><td></td>
+          <td><div class="c out"><b>Gets a consultation slot</b>During the call. Never a price.</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Vaani AI<span>Live voice agent</span></th>
+          <td><div class="c sys"><b>Call connects</b>Greeting discloses recording</div></td>
+          <td><div class="c sys">Caller's speech, English / Hindi / Marathi</div></td>
+          <td><div class="c human"><b>Voice prompt</b>Nikhil's five checks + services. <code>qualified.md</code>, <code>services.md</code> only</div></td>
+          <td><div class="c sys">Asks 7 questions, one at a time; skips what's known</div></td>
+          <td><div class="c ai"><b>Answers, qualifies, books</b>Deflects price: "Your designer will walk you through pricing on the consultation"</div></td>
+          <td><div class="c out"><b>Webhooks</b><code>call_started</code> + <code>call_postprocessing</code> (transcript, entities, recording)</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Webhook + Neon<span>Next.js on Vercel, Postgres</span></th>
+          <td><div class="c sys"><b>Webhook arrives</b><code>?token=</code> secret (Vaani is unsigned)</div></td>
+          <td><div class="c sys">Caller number, start/end, transcript, entities</div></td>
+          <td><div class="c sys">Idempotency latch: a retry never double-emails</div></td>
+          <td><div class="c sys">Log call; derive duration if missing; after-hours flag; voice cost</div></td>
+          <td></td>
+          <td><div class="c out"><b>Call row in Neon</b><code>calls</code>, <code>daily_metrics</code></div></td>
+        </tr>
+        <tr>
+          <th scope="row">Qualification agent<span>Gemini Flash, JSON mode</span></th>
+          <td><div class="c sys"><b>Call ends</b>Transcript available</div></td>
+          <td><div class="c sys">Transcript + call time + Vaani's extracted fields</div></td>
+          <td><div class="c human"><b>Rubric</b><code>qualified.md</code> + <code>services.md</code> verbatim</div></td>
+          <td><div class="c sys">Structured schema: lead fields, deciding criterion</div></td>
+          <td><div class="c ai"><b>Classify</b>qualified · not_fit · complaint · unclear, plus an 8-line handoff note</div></td>
+          <td><div class="c out"><b>Result + note</b>Names the deciding criterion</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Price guard<span>Code, not a prompt</span></th>
+          <td><div class="c sys"><b>Every AI output</b>Before store, email, CRM</div></td>
+          <td><div class="c sys">AI text + the caller's own words</div></td>
+          <td><div class="c sys">Caller-volunteered budget is allowed through</div></td>
+          <td><div class="c esc"><b>Strip price lines</b>₹, lakh, crore, per-sq-ft rates</div></td>
+          <td></td>
+          <td><div class="c out"><b>Clean output</b>0 price figures</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Designer<span>Email via Resend</span></th>
+          <td><div class="c sys"><b>Lead is qualified</b></div></td>
+          <td><div class="c sys">Lead fields, note, booked slot, recording</div></td>
+          <td><div class="c sys">Routing: matching specialty, fewest leads this week</div></td>
+          <td><div class="c sys">Signed Claim / Reschedule links: GET confirms, POST records</div></td>
+          <td></td>
+          <td><div class="c human"><b>Designer email</b>Claims the lead, owns the relationship and the price</div></td>
+        </tr>
+        <tr>
+          <th scope="row">HubSpot<span>CRM</span></th>
+          <td><div class="c sys"><b>Lead is qualified</b></div></td>
+          <td><div class="c sys">Name, property, area, note</div></td>
+          <td></td>
+          <td><div class="c sys">Best-effort: failure never blocks the email</div></td>
+          <td></td>
+          <td><div class="c out"><b>Deal</b>"Name · Property · Area"</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Front desk<span>Human</span></th>
+          <td><div class="c esc"><b>Complaint, AI failure or reschedule</b></div></td>
+          <td><div class="c sys">Raw transcript, number, recording</div></td>
+          <td></td><td></td><td></td>
+          <td><div class="c esc"><b>Human calls back</b>First thing. Never-lose-a-lead path</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Not a fit / unclear<span>Closed on the call</span></th>
+          <td><div class="c sys"><b>Classified not_fit or unclear</b></div></td>
+          <td></td><td></td><td></td><td></td>
+          <td><div class="c esc"><b>Logged only</b>Visible on the dashboard with the reason</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Nikhil / founder<span>Dashboard</span></th>
+          <td><div class="c sys"><b>Opens dashboard</b>Password protected</div></td>
+          <td><div class="c sys">Data from Neon</div></td>
+          <td></td>
+          <td><div class="c sys">Aggregate by day and range (7 / 30 / 90 days)</div></td>
+          <td></td>
+          <td><div class="c out"><b>Results and cost</b>Calls, after-hours, qualified, booked, show-ups, won, ₹ cost; marks show-ups and wins</div></td>
+        </tr>
+        <tr>
+          <th scope="row">Deployment<span>For the dashboard and API</span></th>
+          <td><div class="c sys"><b>git push</b></div></td>
+          <td><div class="c sys">GitHub repo</div></td>
+          <td><div class="c sys">Secrets only in Vercel env, never in git</div></td>
+          <td><div class="c sys">Vercel builds; functions in Singapore next to Neon</div></td>
+          <td></td>
+          <td><div class="c out"><b>Live URL</b>Hosted on Vercel</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend" aria-label="Legend">
+    <span><i class="ai"></i>AI component</span>
+    <span><i class="sys"></i>System step</span>
+    <span><i class="out"></i>Output</span>
+    <span><i class="human"></i>Human-owned (rules, relationship, price)</span>
+    <span><i class="esc"></i>Escalation, guard or closed</span>
+  </div>
+
+  <section class="notes" aria-label="Boundaries">
+    <div class="note"><h3>Owner is clear</h3><p>The agent qualifies and books. The designer owns the relationship. Nikhil owns the price.</p></div>
+    <div class="note"><h3>Judgment stays human</h3><p>Quotes, site-visit or date commitments, and complaints are never handled by the agent.</p></div>
+    <div class="note"><h3>Measured from day one</h3><p>Time from call end to designer email, consultations booked, show-up rate and running cost per qualified lead.</p></div>
+  </section>
+</div>
+</body>
+</html>
