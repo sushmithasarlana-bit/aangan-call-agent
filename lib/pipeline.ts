@@ -22,7 +22,11 @@ export async function handleVaaniEvent(payload: unknown) {
 
   // Test pings, ringing, picked-up and other lifecycle events: acknowledge and move on.
   if (kind === "other") return { status: 200, body: { ok: true, ignored: ev.event } };
-  if (!ev.callId) return { status: 400, body: { error: "No call id (room_name / call_id) in payload" } };
+  if (!ev.callId) {
+    // Nothing to store without an id (a sample test payload, or an unexpected format: see the shape log above).
+    console.warn("vaani event without call id", ev.event);
+    return { status: 200, body: { ok: true, ignored: "no call id (room_name / call_id)" } };
+  }
   const db = sql();
   const raw = JSON.stringify(payload);
 
