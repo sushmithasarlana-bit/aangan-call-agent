@@ -1,6 +1,6 @@
 import { sql } from "./db";
 import { env, numEnv, optionalEnv } from "./env";
-import { readVaani } from "./vaani";
+import { eventKind, payloadShape, readVaani } from "./vaani";
 import { classify, type ClassifyOutput } from "./classify";
 import { formatTurns, type Turn } from "./transcript";
 import { isAfterHours, fmtIST } from "./hours";
@@ -17,11 +17,16 @@ const iso = (d: Date | null | undefined) => (d ? d.toISOString() : null);
  */
 export async function handleVaaniEvent(payload: unknown) {
   const ev = readVaani(payload);
-  if (!ev.callId) return { status: 400, body: { error: "No call id in payload" } };
+  const kind = eventKind(ev.event);
+  console.log("vaani event", JSON.stringify({ event: ev.event, kind, callId: ev.callId, shape: payloadShape(payload) }));
+
+  // Test pings, ringing, picked-up and other lifecycle events: acknowledge and move on.
+  if (kind === "other") return { status: 200, body: { ok: true, ignored: ev.event } };
+  if (!ev.callId) return { status: 400, body: { error: "No call id (room_name / call_id) in payload" } };
   const db = sql();
   const raw = JSON.stringify(payload);
 
-  if (ev.event === "call_started") {
+  if (kind === "started") {
     const startedAt = ev.startedAt ?? ev.at ?? new Date();
     await db`
       insert into calls (vaani_call_id, caller_number, status, started_at, after_hours, last_payload)
@@ -31,10 +36,6 @@ export async function handleVaaniEvent(payload: unknown) {
         started_at    = coalesce(calls.started_at, excluded.started_at),
         after_hours   = coalesce(calls.after_hours, excluded.after_hours)`;
     return { status: 200, body: { ok: true, stored: "call_started" } };
-  }
-
-  if (ev.event !== "call_postprocessing") {
-    return { status: 200, body: { ok: true, ignored: ev.event } };
   }
 
   // 1. Log the call (fills in whatever call_started didn't).

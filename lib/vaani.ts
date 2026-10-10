@@ -12,6 +12,23 @@ export function tokenOk(token: string | null, secret: string): boolean {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+/** "call_started", "Call Started", "call.started" all mean the same event. */
+export function eventKind(event: string): "started" | "final" | "other" {
+  const e = event.toLowerCase().replace(/[^a-z]/g, "");
+  if (e === "callstarted") return "started";
+  if (e === "callpostprocessing" || e === "postprocessing" || e === "callpostprocessed") return "final";
+  return "other";
+}
+
+/** Field names only (never values: they include phone numbers), for debugging the payload shape. */
+export function payloadShape(payload: any): Record<string, string[]> {
+  const shape: Record<string, string[]> = { top: Object.keys(payload ?? {}) };
+  for (const k of ["data", "call", "call_details"]) {
+    if (payload?.[k] && typeof payload[k] === "object") shape[k] = Object.keys(payload[k]);
+  }
+  return shape;
+}
+
 export type VaaniEvent = {
   event: string;
   callId: string | null;

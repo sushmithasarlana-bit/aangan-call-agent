@@ -11,11 +11,14 @@ export async function POST(req: NextRequest) {
   if (!tokenOk(req.nextUrl.searchParams.get("token"), env("VAANI_WEBHOOK_SECRET"))) {
     return NextResponse.json({ error: "Not authorised" }, { status: 401 });
   }
+  const text = await req.text();
   let payload: unknown;
   try {
-    payload = await req.json();
+    payload = JSON.parse(text);
   } catch {
-    return NextResponse.json({ error: "Body is not JSON" }, { status: 400 });
+    // Vaani's "Test Connectivity" may send an empty or non-JSON body: the token passed, so say yes.
+    console.log("vaani webhook: non-JSON body", JSON.stringify({ length: text.length, contentType: req.headers.get("content-type") }));
+    return NextResponse.json({ ok: true, ignored: "non-JSON body" });
   }
   try {
     const { status, body } = await handleVaaniEvent(payload);
