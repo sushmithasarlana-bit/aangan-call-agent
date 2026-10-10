@@ -50,7 +50,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         (avg(extract(epoch from handoff_sent_at - ended_at)) filter (where handoff_sent_at is not null and ended_at is not null))::float as avg_handoff,
         coalesce(sum(duration_sec), 0)::float / 60 as minutes
       from calls where coalesce(started_at, created_at) > now() - make_interval(days => ${days})`,
-    db`select * from daily_metrics where day > (now() at time zone 'Asia/Kolkata')::date - ${days}::int limit 14`,
+    db`select *, to_char(day, 'Dy, DD Mon') as label from daily_metrics where day > (now() at time zone 'Asia/Kolkata')::date - ${days}::int limit 14`,
     db`
       select c.id, coalesce(c.started_at, c.created_at) as at, c.caller_number, c.duration_sec, c.after_hours,
         c.classification, c.fit_reason, c.asked_pricing, c.ai_error, c.booked_slot, c.claimed_by, c.showed_up,
@@ -233,7 +233,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
               <tbody>
                 {daily.map((d: any) => (
                   <tr key={String(d.day)}>
-                    <td className="when">{fmtIST(d.day, { hour: undefined, minute: undefined, timeZone: "UTC" })}</td>
+                    <td className="when">{d.label}</td>
                     <td className="num">{d.calls}</td>
                     <td className="num">{d.after_hours_calls}</td>
                     <td className="num">{d.qualified}</td>

@@ -114,7 +114,8 @@ th:first-child, td:first-child { padding-left: 20px; }
 th:last-child, td:last-child { padding-right: 20px; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover td { background: color-mix(in srgb, var(--brick-soft) 35%, transparent); }
-td.num, th.num { text-align: right; font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th.num { text-align: right; }
+td.num { text-align: right; font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .when { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
 .nowrap { white-space: nowrap; }
 .reason { min-width: 240px; max-width: 360px; color: var(--ink-2); }
