@@ -56,6 +56,17 @@ Caller ─► Vaani AI voice agent: answers, asks the qualifying questions, book
 | 🚧 07 | Is judgment protected? | **Partly.** Quoting, committing to site visits or dates, and complaints stay with people. |
 | 🚧 09 | Is the owner clear? | **Yes.** The agent qualifies and books, the designer owns the relationship, and Nikhil owns the price. |
 
+## The dashboard
+
+Behind the dashboard password (username `aangan`):
+
+- **Overview:** calls answered, qualified leads, consultations and running cost, each compared with the previous period; calls by day (stacked by result, hover for detail, with a data table); lead status; designer follow-up; when calls arrive (heatmap by day and time); why leads were closed.
+- **Your metrics** (`/metrics`): Nikhil adds, edits, reorders and deletes his own KPI cards, either a single number or one count as a share of another, with an optional target. Metrics are built from a fixed catalog in [`lib/metrics.ts`](lib/metrics.ts), so a definition never carries SQL.
+- **Meeting summary** (`/report`): a one-page A4 summary with KPIs, chart, talking points, lead status, close reasons, custom metrics and qualified leads. Print it or save it as a PDF.
+- **Downloads:** `/reports/calls.csv` and `/reports/daily.csv` for the selected range.
+- **Profile** (`/profile`): name, role, email and a display picture, resized to 256 px in the browser before upload.
+- Light and dark themes. Colour follows 60-30-10 (neutral canvas, cards and type, brick accent), and the chart colours pass a colour-blind check in both themes.
+
 ## How the Cut is enforced (three layers)
 
 1. **The voice prompt** forbids any price, rate, range or estimate and gives one deflection line ([`vaani/agent-setup.md`](vaani/agent-setup.md)).

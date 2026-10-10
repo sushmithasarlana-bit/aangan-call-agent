@@ -80,3 +80,28 @@ order by 1 desc;
 
 -- Add at least one designer. With Resend's sandbox sender, use your Resend signup email:
 -- insert into designers (name, email, specialties) values ('Test Designer', 'you@example.com', '{home,office}');
+
+-- Founder's own KPI cards, built from the fixed measure catalog in lib/metrics.ts (no free-form SQL).
+create table if not exists metrics (
+  id               uuid primary key default gen_random_uuid(),
+  name             text not null check (char_length(name) between 1 and 60),
+  kind             text not null check (kind in ('value','rate')),   -- value = one measure; rate = measure / denominator × 100
+  measure          text not null,
+  denominator      text,
+  target           numeric,
+  higher_is_better boolean not null default true,
+  position         integer not null default 0,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+-- The dashboard owner's profile (single row). photo is a small data: URL (resized to 256 px in the browser).
+create table if not exists profile (
+  id         integer primary key default 1 check (id = 1),
+  name       text not null default 'Nikhil Deshpande',
+  role       text not null default 'Founder',
+  email      text,
+  photo      text,
+  updated_at timestamptz not null default now()
+);
+insert into profile (id) values (1) on conflict (id) do nothing;
