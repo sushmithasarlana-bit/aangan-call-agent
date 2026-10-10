@@ -63,157 +63,214 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   ]);
   const k = kpiRows[0] as Kpis;
 
+  const stages = [
+    { label: "Calls answered", value: k.calls, dim: `${k.after_hours} after hours · ${pct(k.after_hours, k.calls)}`, sub: "Day or night, every call" },
+    { label: "Qualified", value: k.qualified, dim: `${pct(k.qualified, k.calls)} of calls`, sub: `${k.not_fit} not a fit, closed kindly` },
+    { label: "Consultations booked", value: k.booked, dim: `${pct(k.booked, k.qualified)} of qualified`, sub: "Booked during the call" },
+    { label: "Showed up", value: k.showed_up, dim: `${pct(k.showed_up, k.booked)} of booked`, sub: "Marked by the team below" },
+    { label: "Projects won", value: k.won, dim: `${pct(k.won, k.showed_up)} of show-ups`, sub: k.won_value ? `${inr(k.won_value, true)} in projects` : "Mark wins below" },
+  ];
+
   return (
     <main>
-      <div className="head">
-        <div>
-          <p className="kicker">Aangan Studio</p>
-          <h1>Call agent dashboard</h1>
-          <p className="sub">Every call answered, qualified against Nikhil&apos;s rubric and handed to a designer.</p>
+      <header className="sheet-head">
+        <div className="brand">
+          <CourtyardMark />
+          <div>
+            <p className="eyebrow">Aangan Studio · Pune</p>
+            <h1>Call agent</h1>
+            <p className="sub">Every call answered, qualified against Nikhil&apos;s rubric and handed to a designer.</p>
+          </div>
         </div>
-        <nav className="filters" aria-label="Date range">
+        <nav className="range" aria-label="Date range">
           {RANGES.map((d) => (
             <a key={d} href={`/?days=${d}`} aria-current={d === days ? "page" : undefined}>
               {d} days
             </a>
           ))}
         </nav>
+      </header>
+
+      <div className="titleblock" aria-label="Sheet details">
+        <span>Range <b>last {days} days</b></span>
+        <span>Front desk hours <b>10am–7pm IST</b></span>
+        <span>Updated <b>{fmtIST(new Date())}</b></span>
       </div>
 
-      <section className="hero" aria-label="Calls answered">
-        <span className="value">{k.calls.toLocaleString("en-IN")}</span>
-        <span className="label">
-          calls answered in the last {days} days, <strong>{k.after_hours}</strong> of them ({pct(k.after_hours, k.calls)}) outside
-          front-desk hours (10am–7pm)
-        </span>
+      <section className="panel" aria-labelledby="pipe-h">
+        <div className="panel-head">
+          <h2 id="pipe-h">From call to project</h2>
+          <span className="mono">Each span shows the share carried forward</span>
+        </div>
+        <ol className="pipeline">
+          {stages.map((s) => (
+            <li className="stage" key={s.label}>
+              <div className="dim"><span>{s.dim}</span></div>
+              <div className="stage-label">{s.label}</div>
+              <div className="stage-value">{s.value.toLocaleString("en-IN")}</div>
+              <div className="stage-sub">{s.sub}</div>
+            </li>
+          ))}
+        </ol>
       </section>
 
-      <section className="tiles" aria-label="Results">
-        <Tile label="Qualified" value={k.qualified} note={`${pct(k.qualified, k.calls)} of calls · ${k.not_fit} not a fit`} />
-        <Tile label="Consultations booked" value={k.booked} note={`${pct(k.booked, k.qualified)} of qualified`} />
-        <Tile label="Showed up" value={k.showed_up} note={`${pct(k.showed_up, k.booked)} of booked`} />
-        <Tile label="Projects won" value={k.won} note={k.won_value ? `${inr(k.won_value, true)} in projects` : "Mark wins below"} />
-        <Tile label="Running cost" value={inr(k.cost)} note={`${Math.round(k.minutes)} voice min · ${k.qualified ? inr(k.cost / k.qualified) : "–"} per qualified lead`} />
-        <Tile label="Call end to designer email" value={dur(k.avg_handoff)} note="Average, qualified leads and complaints" />
-        <Tile label="Asked about price" value={k.asked_pricing} note="All deflected to the designer. 0 quoted." />
-        <Tile label="Complaints to a human" value={k.complaints} note={`${k.unclear} unclear call${k.unclear === 1 ? "" : "s"} logged`} />
+      <section className="panel" aria-label="Operations">
+        <dl className="ops">
+          <div>
+            <dt>Running cost</dt>
+            <dd>{inr(k.cost)}</dd>
+            <p>{Math.round(k.minutes)} voice min · {k.qualified ? inr(k.cost / k.qualified) : "–"} per qualified lead</p>
+          </div>
+          <div>
+            <dt>Call end to designer email</dt>
+            <dd>{dur(k.avg_handoff)}</dd>
+            <p>Average, qualified leads and complaints</p>
+          </div>
+          <div>
+            <dt>Asked about price</dt>
+            <dd>{k.asked_pricing}</dd>
+            <p>All sent to the designer. 0 quoted.</p>
+          </div>
+          <div>
+            <dt>Complaints to a person</dt>
+            <dd>{k.complaints}</dd>
+            <p>{k.unclear} unclear call{k.unclear === 1 ? "" : "s"} logged</p>
+          </div>
+        </dl>
       </section>
 
-      <h2>Recent calls</h2>
-      <div className="table-wrap">
-        {calls.length === 0 ? (
-          <p className="empty">No calls yet in this range. Make a Vaani test call, or run scripts/send-test-webhook.mjs.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>When (IST)</th><th>Caller</th><th className="num">Length</th><th>Result</th><th>Why</th>
-                <th>Designer</th><th>Slot</th><th className="num">Cost</th><th>Outcome</th>
-              </tr>
-            </thead>
-            <tbody>
-              {calls.map((c: any) => (
-                <tr key={c.id}>
-                  <td className="nowrap">
-                    {fmtIST(c.at)}
-                    {c.after_hours ? <> <span className="pill">after hours</span></> : null}
-                  </td>
-                  <td>
-                    {c.name ?? <span className="dim">Unknown</span>}
-                    <div className="dim nowrap">{[c.caller_number, c.area].filter(Boolean).join(" · ")}</div>
-                  </td>
-                  <td className="num">{dur(c.duration_sec)}</td>
-                  <td>
-                    <Badge c={c} />
-                    {c.asked_pricing ? <div><span className="pill">asked price</span></div> : null}
-                  </td>
-                  <td className="reason">
-                    {c.ai_error
-                      ? c.errors > 0
-                        ? "AI step failed and the front-desk email failed too. Read the transcript in the database and call back."
-                        : "AI step failed; raw transcript emailed to the front desk."
-                      : c.fit_reason ?? <span className="dim">Processing…</span>}
-                    {c.errors > 0 && !c.ai_error ? <div className="dim">{c.errors} output error(s), see the database row</div> : null}
-                  </td>
-                  <td>
-                    {c.designer ?? <span className="dim">–</span>}
-                    {c.claimed_by ? <div className="dim">Claimed by {c.claimed_by}</div> : null}
-                  </td>
-                  <td className="nowrap">{c.booked_slot ? fmtIST(c.booked_slot) : <span className="dim">–</span>}</td>
-                  <td className="num">{inr(c.cost ?? 0)}</td>
-                  <td>
-                    {c.classification === "qualified" ? (
-                      c.project_won ? (
-                        <span>Won{c.project_value_inr ? ` · ${inr(Number(c.project_value_inr), true)}` : ""}</span>
+      <section className="panel" aria-labelledby="calls-h">
+        <div className="panel-head">
+          <h2 id="calls-h">Recent calls</h2>
+          <span className="mono">Latest {calls.length} · times in IST</span>
+        </div>
+        <div className="table-wrap">
+          {calls.length === 0 ? (
+            <p className="empty">No calls in this range yet. Make a Vaani test call, or run scripts/send-test-webhook.mjs.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>When</th><th>Caller</th><th className="num">Length</th><th>Result</th><th>Why</th>
+                  <th>Designer</th><th>Slot</th><th className="num">Cost</th><th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {calls.map((c: any) => (
+                  <tr key={c.id}>
+                    <td>
+                      <div className="when">{fmtIST(c.at)}</div>
+                      {c.after_hours ? <span className="tag night">After hours</span> : null}
+                    </td>
+                    <td>
+                      <div className="who">{c.name ?? <span className="muted">Unknown</span>}</div>
+                      <div className="small nowrap">{[c.caller_number, c.area].filter(Boolean).join(" · ")}</div>
+                    </td>
+                    <td className="num">{dur(c.duration_sec)}</td>
+                    <td>
+                      <Badge c={c} />
+                      {c.asked_pricing ? <div><span className="tag">Asked price</span></div> : null}
+                    </td>
+                    <td className="reason">
+                      {c.ai_error
+                        ? c.errors > 0
+                          ? "AI step failed and the front-desk email failed too. Read the transcript in the database and call back."
+                          : "AI step failed; raw transcript emailed to the front desk."
+                        : c.fit_reason ?? <span className="muted">Processing…</span>}
+                      {c.errors > 0 && !c.ai_error ? <div className="small">{c.errors} output error(s), see the database row</div> : null}
+                    </td>
+                    <td>
+                      {c.designer ?? <span className="muted">–</span>}
+                      {c.claimed_by ? <div className="small">Claimed by {c.claimed_by}</div> : null}
+                    </td>
+                    <td className="when">{c.booked_slot ? fmtIST(c.booked_slot) : <span className="muted">–</span>}</td>
+                    <td className="num">{inr(c.cost ?? 0)}</td>
+                    <td>
+                      {c.classification === "qualified" ? (
+                        c.project_won ? (
+                          <span className="won">Won{c.project_value_inr ? ` · ${inr(Number(c.project_value_inr), true)}` : ""}</span>
+                        ) : (
+                          <>
+                            <form action={markShowedUp} className="inline">
+                              <input type="hidden" name="id" value={c.id} />
+                              <button type="submit" className="btn">{c.showed_up ? "✓ Showed up" : "Mark showed up"}</button>
+                            </form>
+                            <form action={markWon} className="inline">
+                              <input type="hidden" name="id" value={c.id} />
+                              <input name="value" className="field" inputMode="numeric" placeholder="₹ value" aria-label="Project value in rupees" />
+                              <button type="submit" className="btn primary">Won</button>
+                            </form>
+                          </>
+                        )
                       ) : (
-                        <>
-                          <form action={markShowedUp} className="inline">
-                            <input type="hidden" name="id" value={c.id} />
-                            <button type="submit">{c.showed_up ? "✓ Showed up" : "Mark showed up"}</button>
-                          </form>
-                          <form action={markWon} className="inline">
-                            <input type="hidden" name="id" value={c.id} />
-                            <input name="value" inputMode="numeric" placeholder="₹ value" aria-label="Project value in rupees" />
-                            <button type="submit">Won</button>
-                          </form>
-                        </>
-                      )
-                    ) : (
-                      <span className="dim">–</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+                        <span className="muted">–</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
 
-      <h2>By day</h2>
-      <div className="table-wrap">
-        {daily.length === 0 ? (
-          <p className="empty">No days with calls in this range.</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Day</th><th className="num">Calls</th><th className="num">After hours</th><th className="num">Qualified</th>
-                <th className="num">Booked</th><th className="num">Showed up</th><th className="num">Won</th><th className="num">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              {daily.map((d: any) => (
-                <tr key={String(d.day)}>
-                  <td className="nowrap">{fmtIST(d.day, { hour: undefined, minute: undefined, timeZone: "UTC" })}</td>
-                  <td className="num">{d.calls}</td>
-                  <td className="num">{d.after_hours_calls}</td>
-                  <td className="num">{d.qualified}</td>
-                  <td className="num">{d.booked}</td>
-                  <td className="num">{d.showed_up}</td>
-                  <td className="num">{d.won}</td>
-                  <td className="num">{inr(Number(d.cost_inr ?? 0))}</td>
+      <section className="panel" aria-labelledby="day-h">
+        <div className="panel-head">
+          <h2 id="day-h">By day</h2>
+          <span className="mono">Up to 14 days</span>
+        </div>
+        <div className="table-wrap">
+          {daily.length === 0 ? (
+            <p className="empty">No days with calls in this range.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Day</th><th className="num">Calls</th><th className="num">After hours</th><th className="num">Qualified</th>
+                  <th className="num">Booked</th><th className="num">Showed up</th><th className="num">Won</th><th className="num">Cost</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {daily.map((d: any) => (
+                  <tr key={String(d.day)}>
+                    <td className="when">{fmtIST(d.day, { hour: undefined, minute: undefined, timeZone: "UTC" })}</td>
+                    <td className="num">{d.calls}</td>
+                    <td className="num">{d.after_hours_calls}</td>
+                    <td className="num">{d.qualified}</td>
+                    <td className="num">{d.booked}</td>
+                    <td className="num">{d.showed_up}</td>
+                    <td className="num">{d.won}</td>
+                    <td className="num">{inr(Number(d.cost_inr ?? 0))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
 
-      <p className="cut">
-        <strong>The Cut:</strong> the agent never quotes a price. Callers who ask are told their designer will walk them through
-        pricing at the consultation, and a code-level filter strips any price line from AI output before it is stored or emailed.
-      </p>
+      <aside className="note" aria-label="The Cut">
+        <span className="mono">Note · the Cut</span>
+        <p>
+          The agent never quotes a price. Callers who ask are told their designer will walk them through pricing at the
+          consultation, and a filter in the code strips any price line from AI output before it is stored or emailed.
+        </p>
+      </aside>
+
+      <footer>
+        <span>Aangan Studio · interior design for homes and offices · Pune and PCMC</span>
+        <span>Aangan (आँगन): the courtyard at the centre of a home</span>
+      </footer>
     </main>
   );
 }
 
-function Tile({ label, value, note }: { label: string; value: string | number; note?: string }) {
+/** A plan of a courtyard house: walls around an open aangan, entered from the street side. */
+function CourtyardMark() {
   return (
-    <div className="tile">
-      <div className="label">{label}</div>
-      <div className="value">{typeof value === "number" ? value.toLocaleString("en-IN") : value}</div>
-      {note ? <div className="note">{note}</div> : null}
-    </div>
+    <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path className="wall" d="M3 3h26v26H18.5v-7h3.5V10H10v12h3.5v7H3z" />
+    </svg>
   );
 }
 
