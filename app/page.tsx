@@ -96,7 +96,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <Tile label="Running cost" value={inr(k.cost)} note={`${Math.round(k.minutes)} voice min · ${k.qualified ? inr(k.cost / k.qualified) : "–"} per qualified lead`} />
         <Tile label="Call end to designer email" value={dur(k.avg_handoff)} note="Average, qualified leads and complaints" />
         <Tile label="Asked about price" value={k.asked_pricing} note="All deflected to the designer. 0 quoted." />
-        <Tile label="Complaints to a human" value={k.complaints} note={`${k.unclear} unclear calls logged`} />
+        <Tile label="Complaints to a human" value={k.complaints} note={`${k.unclear} unclear call${k.unclear === 1 ? "" : "s"} logged`} />
       </section>
 
       <h2>Recent calls</h2>
@@ -128,8 +128,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                     {c.asked_pricing ? <div><span className="pill">asked price</span></div> : null}
                   </td>
                   <td className="reason">
-                    {c.ai_error ? "AI step failed; raw transcript emailed to the front desk." : c.fit_reason ?? <span className="dim">Processing…</span>}
-                    {c.errors > 0 ? <div className="dim">{c.errors} output error(s), see the database row</div> : null}
+                    {c.ai_error
+                      ? c.errors > 0
+                        ? "AI step failed and the front-desk email failed too. Read the transcript in the database and call back."
+                        : "AI step failed; raw transcript emailed to the front desk."
+                      : c.fit_reason ?? <span className="dim">Processing…</span>}
+                    {c.errors > 0 && !c.ai_error ? <div className="dim">{c.errors} output error(s), see the database row</div> : null}
                   </td>
                   <td>
                     {c.designer ?? <span className="dim">–</span>}
